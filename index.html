@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPK KNN - Prediksi Risiko Diabetes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-4 font-sans">
+    <div class="max-w-md mx-auto bg-white rounded-xl shadow-md overflow-hidden md:max-w-2xl p-6">
+        <h1 class="text-xl font-bold text-blue-600 mb-2 text-center">🩺 SPK Prediksi Risiko Diabetes</h1>
+        <p class="text-xs text-gray-500 text-center mb-6">Algoritma K-Nearest Neighbors (KNN)</p>
+        
+        <!-- Input Form -->
+        <div class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Usia</label>
+                <input type="number" id="usia" value="42" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">BMI</label>
+                <input type="number" step="0.1" id="bmi" value="28.5" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Glukosa</label>
+                <input type="number" id="glukosa" value="130" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Tekanan Darah</label>
+                <input type="number" id="tekanan" value="128" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700">Riwayat Keluarga</label>
+                <select id="riwayat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm border p-2">
+                    <option value="0">0 = Tidak Ada</option>
+                    <option value="1" selected>1 = Ada</option>
+                </select>
+            </div>
+            <button onclick="hitungKNN()" class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">
+                Hitung Prediksi KNN
+            </button>
+        </div>
+
+        <!-- Hasil -->
+        <div id="hasil" class="mt-6 p-4 rounded-lg hidden text-center font-bold"></div>
+    </div>
+
+    <script>
+        // Data Latihan dari Dokumen Tugas
+        const dataset = [
+            {usia: 25, bmi: 21.5, glukosa: 90, tekanan: 110, riwayat: 0, kelas: 'Rendah'},
+            {usia: 30, bmi: 23.1, glukosa: 95, tekanan: 115, riwayat: 0, kelas: 'Rendah'},
+            {usia: 35, bmi: 25.0, glukosa: 105, tekanan: 120, riwayat: 0, kelas: 'Rendah'},
+            {usia: 40, bmi: 27.5, glukosa: 120, tekanan: 125, riwayat: 1, kelas: 'Tinggi'},
+            {usia: 45, bmi: 30.2, glukosa: 140, tekanan: 135, riwayat: 1, kelas: 'Tinggi'},
+            {usia: 50, bmi: 31.5, glukosa: 155, tekanan: 140, riwayat: 1, kelas: 'Tinggi'},
+            {usia: 55, bmi: 33.0, glukosa: 165, tekanan: 145, riwayat: 1, kelas: 'Tinggi'},
+            {usia: 28, bmi: 22.5, glukosa: 92, tekanan: 112, riwayat: 0, kelas: 'Rendah'},
+            {usia: 38, bmi: 26.8, glukosa: 115, tekanan: 122, riwayat: 0, kelas: 'Rendah'},
+            {usia: 48, bmi: 29.5, glukosa: 145, tekanan: 130, riwayat: 1, kelas: 'Tinggi'}
+        ];
+
+        function hitungKNN() {
+            const u = parseFloat(document.getElementById('usia').value);
+            const b = parseFloat(document.getElementById('bmi').value);
+            const g = parseFloat(document.getElementById('glukosa').value);
+            const t = parseFloat(document.getElementById('tekanan').value);
+            const r = parseInt(document.getElementById('riwayat').value);
+            const k = 3; // Nilai K
+
+            // Hitung Jarak Euclidean
+            let jarakArray = dataset.map(d => {
+                let jarak = Math.sqrt(
+                    Math.pow(d.usia - u, 2) +
+                    Math.pow(d.bmi - b, 2) +
+                    Math.pow(d.glukosa - g, 2) +
+                    Math.pow(d.tekanan - t, 2) +
+                    Math.pow(d.riwayat - r, 2)
+                );
+                return { jarak: jarak, kelas: d.kelas };
+            });
+
+            // Urutkan jarak terdekat
+            jarakArray.sort((a, b) => a.jarak - b.jarak);
+
+            // Ambil K tetangga terdekat
+            let kTetangga = jarakArray.slice(0, k);
+            let tinggi = kTetangga.filter(item => item.kelas === 'Tinggi').length;
+            let rendah = kTetangga.filter(item => item.kelas === 'Rendah').length;
+
+            let hasilDiv = document.getElementById('hasil');
+            hasilDiv.classList.remove('hidden');
+
+            if (tinggi > rendah) {
+                hasilDiv.className = "mt-6 p-4 rounded-lg text-center font-bold bg-red-100 text-red-700";
+                hasilDiv.innerHTML = "Hasil Prediksi: Risiko <b>TINGGI</b> Diabetes 🔴";
+            } else {
+                hasilDiv.className = "mt-6 p-4 rounded-lg text-center font-bold bg-green-100 text-green-700";
+                hasilDiv.innerHTML = "Hasil Prediksi: Risiko <b>RENDAH</b> Diabetes 🟢";
+            }
+        }
+    </script>
+</body>
+</html>
